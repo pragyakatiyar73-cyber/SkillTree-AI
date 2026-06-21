@@ -33,20 +33,27 @@ export default function ProjectDetailPage() {
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([0]));
 
   useEffect(() => {
-    if (id && user) loadProject(id);
-  }, [id, user]);
+    if (id && user?.id) loadProject(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id]);
 
   const loadProject = async (projectId: string) => {
+    if (!user?.id) return;
     setLoading(true);
+    setError('');
     try {
       const { data, error: err } = await supabase
         .from('ai_projects')
         .select('*')
         .eq('id', projectId)
-        .eq('user_id', user!.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
       if (err) throw err;
-      setProject(data as AIProject);
+      if (!data) {
+        setError('Project not found or you do not have access.');
+      } else {
+        setProject(data as AIProject);
+      }
     } catch (e) {
       setError('Project not found or you do not have access.');
     } finally {

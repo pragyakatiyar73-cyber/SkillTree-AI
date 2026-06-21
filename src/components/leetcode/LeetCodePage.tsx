@@ -21,8 +21,9 @@ export default function LeetCodePage() {
   const HARD_TOTAL = 200;
 
   useEffect(() => {
-    if (user) fetchStats();
-  }, [user]);
+    if (user?.id) fetchStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   useEffect(() => {
     if (profile?.leetcode_username) {
@@ -40,7 +41,7 @@ export default function LeetCodePage() {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
 
       if (data) {
         setStats(data);
@@ -117,7 +118,9 @@ export default function LeetCodePage() {
       }
 
       // Save username to profile
-      await updateProfile({ leetcode_username: username.trim() });
+      if (updateProfile) {
+        await updateProfile({ leetcode_username: username.trim() });
+      }
 
       // Set recent submissions
       if (data.recentSubmissions) {

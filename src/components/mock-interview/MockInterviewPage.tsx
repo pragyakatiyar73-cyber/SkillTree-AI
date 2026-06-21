@@ -106,11 +106,12 @@ export default function MockInterviewPage() {
   const [showDetailedReport, setShowDetailedReport] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchQuestions();
       fetchInterviews();
     }
-  }, [user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const fetchQuestions = async () => {
     try {
@@ -137,9 +138,7 @@ export default function MockInterviewPage() {
         .eq('user_id', user.id)
         .order('date', { ascending: false });
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      if (error) throw error;
 
       if (data) {
         setInterviews(data as MockInterview[]);

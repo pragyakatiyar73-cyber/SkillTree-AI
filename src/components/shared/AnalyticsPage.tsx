@@ -48,10 +48,10 @@ export default function AnalyticsPage() {
 
     // Count from actual tables for reliable data
     const { count: roadmapsGenerated } = await supabase.from('roadmaps').select('*', { count: 'exact', head: true });
-    const { count: projectsCreated } = await supabase.from('projects').select('*', { count: 'exact', head: true });
+    const { count: aiProjectsCreated } = await supabase.from('ai_projects').select('*', { count: 'exact', head: true });
     const { count: mockInterviews } = await supabase.from('mock_interviews').select('*', { count: 'exact', head: true });
     const { count: resumesBuilt } = await supabase.from('resumes').select('*', { count: 'exact', head: true });
-    const { count: mentorSessions } = await supabase.from('chat_messages').select('*', { count: 'exact', head: true });
+    const { count: mentorSessions } = await supabase.from('mentor_sessions').select('*', { count: 'exact', head: true });
     const { count: feedbackCount } = await supabase.from('feedback').select('*', { count: 'exact', head: true });
 
     // Active today
@@ -65,7 +65,7 @@ export default function AnalyticsPage() {
       totalUsers: totalUsers || 0,
       activeToday: activeToday || 0,
       roadmapsGenerated: roadmapsGenerated || 0,
-      projectsCreated: projectsCreated || 0,
+      projectsCreated: aiProjectsCreated || 0,
       mockInterviews: mockInterviews || 0,
       resumesBuilt: resumesBuilt || 0,
       mentorSessions: mentorSessions || 0,
@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
     // Feature usage chart
     const usage = [
       { name: 'Roadmaps', count: roadmapsGenerated || 0 },
-      { name: 'Projects', count: projectsCreated || 0 },
+      { name: 'Projects', count: aiProjectsCreated || 0 },
       { name: 'Interviews', count: mockInterviews || 0 },
       { name: 'Resumes', count: resumesBuilt || 0 },
       { name: 'Mentor', count: mentorSessions || 0 },

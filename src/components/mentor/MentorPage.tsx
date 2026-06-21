@@ -243,7 +243,8 @@ export default function MentorPage() {
       if (err) throw err;
       const list = data ?? [];
       setSessions(list);
-      if (list.length > 0 && !currentSession) {
+      // Only set current session on initial load, not when it's already set
+      if (list.length > 0 && !sessions.length) {
         setCurrentSession(list[0]);
       }
     } catch (e) {
@@ -251,10 +252,12 @@ export default function MentorPage() {
     } finally {
       setSessionsLoading(false);
     }
-  }, [user?.id, currentSession]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   useEffect(() => {
     loadSessions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // ── Load messages for current session ───────────────────────────────────

@@ -61,15 +61,20 @@ export interface ProgressEntry {
   created_at: string;
 }
 
+export interface SkillItem { skill: string; level: number }
+export interface CertItem { name: string; issuer: string; date: string }
+
 export interface Resume {
   id: string;
   user_id: string;
-  personal_details: ResumePersonal;
+  title: string;
+  template: string;
+  theme: 'light' | 'dark';
   education: ResumeEducation[];
-  skills: string[];
+  skills: SkillItem[];
   projects: ResumeProject[];
   experience: ResumeExperience[];
-  resume_score: number;
+  certifications: CertItem[];
   created_at: string;
   updated_at: string;
 }

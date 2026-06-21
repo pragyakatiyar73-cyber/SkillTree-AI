@@ -58,10 +58,11 @@ export default function ProgressPage() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchData();
     }
-  }, [user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const fetchData = async () => {
     if (!user) return;

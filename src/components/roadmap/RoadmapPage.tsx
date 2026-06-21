@@ -525,8 +525,9 @@ export default function RoadmapPage() {
   const [goalDropdownOpen, setGoalDropdownOpen] = useState(false);
 
   useEffect(() => {
-    loadRoadmap();
-  }, [user]);
+    if (user) loadRoadmap();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const loadRoadmap = async () => {
     if (!user) {
@@ -535,11 +536,13 @@ export default function RoadmapPage() {
     }
 
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('roadmaps')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (error) throw error;
 
       if (data) {
         setRoadmap(data);

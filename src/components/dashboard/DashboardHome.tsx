@@ -32,6 +32,7 @@ export default function DashboardHome() {
   useEffect(() => {
     if (!profile?.id) return;
     loadDashboardData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
   const loadDashboardData = async () => {
@@ -61,14 +62,24 @@ export default function DashboardHome() {
         .eq('status', 'completed');
       setProjectsCompleted(projects?.length || 0);
 
-      // Resume score
+      // Resume score - count resume sections completed
       const { data: resumes } = await supabase
         .from('resumes')
-        .select('resume_score')
+        .select('education, experience, skills, projects')
         .eq('user_id', profile.id)
         .order('updated_at', { ascending: false })
         .limit(1);
-      if (resumes && resumes.length > 0) setResumeScore(resumes[0].resume_score || 0);
+      if (resumes && resumes.length > 0) {
+        const r = resumes[0];
+        const eduCount = Array.isArray(r.education) ? r.education.length : 0;
+        const expCount = Array.isArray(r.experience) ? r.experience.length : 0;
+        const skillCount = Array.isArray(r.skills) ? r.skills.length : 0;
+        const projCount = Array.isArray(r.projects) ? r.projects.length : 0;
+        const total = eduCount + expCount + skillCount + projCount;
+        // Score out of 100: max ~25 points each category, capped
+        const score = Math.min(100, Math.round((total / 20) * 100));
+        setResumeScore(score);
+      }
 
       // Weekly time logs for chart
       const weekAgo = new Date();
@@ -107,7 +118,7 @@ export default function DashboardHome() {
         supabase.from('projects').select('status').eq('user_id', profile.id),
         supabase.from('leetcode_stats').select('easy, medium, hard').eq('user_id', profile.id).maybeSingle(),
         supabase.from('time_logs').select('hours').eq('user_id', profile.id),
-        supabase.from('resumes').select('resume_score').eq('user_id', profile.id).limit(1),
+        supabase.from('resumes').select('education, experience, skills, projects').eq('user_id', profile.id).limit(1),
       ]);
 
       let score = 0;
@@ -130,8 +141,16 @@ export default function DashboardHome() {
       // Time invested (+15 max)
       const totalHrs = timeData.data?.reduce((s, t) => s + (t.hours || 0), 0) || 0;
       score += Math.min(15, Math.round((totalHrs / 100) * 15));
-      // Resume score (+15 max)
-      const rScore = resumesData.data?.[0]?.resume_score || 0;
+      // Resume score (+15 max) - calculate from resume sections
+      let rScore = 0;
+      if (resumesData.data?.[0]) {
+        const r = resumesData.data[0];
+        const eduCount = Array.isArray(r.education) ? r.education.length : 0;
+        const expCount = Array.isArray(r.experience) ? r.experience.length : 0;
+        const skillCount = Array.isArray(r.skills) ? r.skills.length : 0;
+        const projCount = Array.isArray(r.projects) ? r.projects.length : 0;
+        rScore = Math.min(100, Math.round(((eduCount + expCount + skillCount + projCount) / 20) * 100));
+      }
       score += Math.min(15, Math.round((rScore / 100) * 15));
       // Skills (+10 max)
       const skillCount = profile.skills?.length || 0;

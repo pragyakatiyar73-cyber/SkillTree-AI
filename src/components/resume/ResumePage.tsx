@@ -88,7 +88,7 @@ export default function ResumePage() {
   const [toast, setToast] = useState('');
 
   // Load data
-  useEffect(() => { if (user) loadData(); }, [user]);
+  useEffect(() => { if (user?.id) loadData(); }, [user?.id]);
 
   const loadData = async () => {
     if (!user) return;

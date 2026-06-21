@@ -43,8 +43,9 @@ export default function ProjectsPage() {
   const [showExamples, setShowExamples] = useState(true);
 
   useEffect(() => {
-    if (user) loadProjects();
-  }, [user]);
+    if (user?.id) loadProjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const loadProjects = async () => {
     if (!user) return;
