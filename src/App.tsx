@@ -19,6 +19,7 @@ import LeetCodePage from './components/leetcode/LeetCodePage';
 import LearningHubPage from './components/learning/LearningHubPage';
 import MockInterviewPage from './components/mock-interview/MockInterviewPage';
 import PlacementPage from './components/placement/PlacementPage';
+import LinkedInCareerPage from './components/linkedin/LinkedInCareerPage';
 import SettingsPage from './components/settings/SettingsPage';
 import FeedbackPage from './components/settings/FeedbackPage';
 import AnalyticsPage from './components/shared/AnalyticsPage';
@@ -78,6 +79,7 @@ function AppRoutes() {
       <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardLayout currentPage="settings"><SettingsPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/feedback" element={<ProtectedRoute><DashboardLayout currentPage="feedback"><FeedbackPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/analytics" element={<ProtectedRoute><DashboardLayout currentPage="analytics"><AnalyticsPage /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/dashboard/linkedin" element={<ProtectedRoute><DashboardLayout currentPage="placement"><LinkedInCareerPage /></DashboardLayout></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
