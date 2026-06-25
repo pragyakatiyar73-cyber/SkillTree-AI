@@ -14,56 +14,43 @@ export interface PlacementScore {
   level: 'Beginner' | 'Intermediate' | 'Placement Ready';
   levelColor: string;
   progressBarColor: string;
+  strokeColor: string;
+}
+
+async function safeFetch<T>(fn: () => Promise<{ data: T | null }>): Promise<T | null> {
+  try {
+    const { data } = await fn();
+    return data ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function calculatePlacementScore(userId: string): Promise<PlacementScore> {
-  // 1. Fetch all data sources
-  const { data: leetcode } = await supabase
-    .from('leetcode_stats')
-    .select('easy, medium, hard')
-    .eq('user_id', userId)
-    .maybeSingle();
+  // 1. Fetch all data sources safely
+  const leetcode = await safeFetch(() =>
+    supabase.from('leetcode_stats').select('easy, medium, hard').eq('user_id', userId).maybeSingle()
+  );
 
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('status')
-    .eq('user_id', userId);
+  const projects = await safeFetch(() =>
+    supabase.from('projects').select('status').eq('user_id', userId)
+  );
 
-  const { data: resumes } = await supabase
-    .from('resumes')
-    .select('personal_details, education, skills, projects, experience, resume_score')
-    .eq('user_id', userId)
-    .maybeSingle();
+  const resumes = await safeFetch(() =>
+    supabase.from('resumes').select('education, experience, skills, projects').eq('user_id', userId).maybeSingle()
+  );
 
-  const { data: interviews } = await supabase
-    .from('mock_interviews')
-    .select('communication_score, overall_score')
-    .eq('user_id', userId)
-    .order('date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const interviews = await safeFetch(() =>
+    supabase.from('mock_interviews').select('communication_score, overall_score').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle()
+  );
 
-  const { data: progress } = await supabase
-    .from('progress')
-    .select('dsa_hours, study_hours, projects_completed')
-    .eq('user_id', userId)
-    .order('date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const progress = await safeFetch(() =>
+    supabase.from('progress').select('dsa_hours, study_hours, projects_completed').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle()
+  );
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('skills, linkedin_url')
-    .eq('id', userId)
-    .maybeSingle();
-
-  const { data: aptitudeTests } = await supabase
-    .from('aptitude_tests')
-    .select('score')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const profile = await safeFetch(() =>
+    supabase.from('profiles').select('skills, linkedin_url').eq('id', userId).maybeSingle()
+  );
 
   // 2. Calculate individual scores (0-100)
   const leetcodeEasy = leetcode?.easy ?? 0;
@@ -75,16 +62,17 @@ export async function calculatePlacementScore(userId: string): Promise<Placement
 
   const totalProjects = projects?.length ?? 0;
   const completedProjects = projects?.filter((p: { status: string }) => p.status === 'completed').length ?? 0;
-  const projectsScore = Math.min(100, Math.round(
-    (totalProjects === 0 ? 0 : completedProjects / totalProjects * 100)
-  ));
-  if (totalProjects === 0 && completedProjects === 0) {
-    // give partial credit for project existence even if none completed
-  }
-  const adjustedProjectsScore = totalProjects === 0 ? 0 : projectsScore;
-  // Actually, let me recalculate: if user has projects, score based on % completed. If no projects, 0.
+  const projectsScore = totalProjects === 0 ? 0 : Math.min(100, Math.round((completedProjects / totalProjects) * 100));
 
-  const resumeScore = Math.min(100, resumes?.resume_score ?? 0);
+  // Resume score from resume sections count (since resume_score column was removed in redesign)
+  let resumeScore = 0;
+  if (resumes) {
+    const eduCount = Array.isArray(resumes.education) ? resumes.education.length : 0;
+    const expCount = Array.isArray(resumes.experience) ? resumes.experience.length : 0;
+    const skillCount = Array.isArray(resumes.skills) ? resumes.skills.length : 0;
+    const projCount = Array.isArray(resumes.projects) ? resumes.projects.length : 0;
+    resumeScore = Math.min(100, Math.round(((eduCount + expCount + skillCount + projCount) / 20) * 100));
+  }
 
   const communicationScore = Math.min(100, interviews?.communication_score ?? 0);
 
@@ -97,30 +85,23 @@ export async function calculatePlacementScore(userId: string): Promise<Placement
   const linkedinScore = profile?.linkedin_url ? 100 : 0;
 
   // 3. Weighted overall score
-  const weightedDsa = dsaScore * 0.30;
-  const weightedProjects = adjustedProjectsScore * 0.25;
-  const weightedResume = resumeScore * 0.15;
-  const weightedCommunication = communicationScore * 0.15;
-  const weightedAptitude = aptitudeScore * 0.10;
-  const weightedLinkedin = linkedinScore * 0.05;
-
   const overall = Math.round(
-    weightedDsa +
-    weightedProjects +
-    weightedResume +
-    weightedCommunication +
-    weightedAptitude +
-    weightedLinkedin
+    dsaScore * 0.30 +
+    projectsScore * 0.25 +
+    resumeScore * 0.15 +
+    communicationScore * 0.15 +
+    aptitudeScore * 0.10 +
+    linkedinScore * 0.05
   );
 
   // 4. Determine strong/weak areas
-  const scores: { name: string; score: number; label: string }[] = [
-    { name: 'DSA Progress', score: dsaScore, label: 'dsa' },
-    { name: 'Projects Completed', score: adjustedProjectsScore, label: 'projects' },
-    { name: 'Resume Completion', score: resumeScore, label: 'resume' },
-    { name: 'Communication Skills', score: communicationScore, label: 'communication' },
-    { name: 'Aptitude Progress', score: aptitudeScore, label: 'aptitude' },
-    { name: 'LinkedIn Profile', score: linkedinScore, label: 'linkedin' },
+  const scores: { name: string; score: number }[] = [
+    { name: 'DSA Progress', score: dsaScore },
+    { name: 'Projects Completed', score: projectsScore },
+    { name: 'Resume Completion', score: resumeScore },
+    { name: 'Communication Skills', score: communicationScore },
+    { name: 'Aptitude Progress', score: aptitudeScore },
+    { name: 'LinkedIn Profile', score: linkedinScore },
   ];
 
   const strongAreas = scores
@@ -140,9 +121,9 @@ export async function calculatePlacementScore(userId: string): Promise<Placement
   } else if (dsaScore < 70) {
     recommendations.push('Focus on medium and hard LeetCode problems to reach an advanced DSA level.');
   }
-  if (adjustedProjectsScore < 50) {
+  if (projectsScore < 50) {
     recommendations.push('Complete more projects from your dashboard to showcase practical skills.');
-  } else if (adjustedProjectsScore < 70) {
+  } else if (projectsScore < 70) {
     recommendations.push('Add more projects with diverse tech stacks to strengthen your portfolio.');
   }
   if (resumeScore < 50) {
@@ -194,7 +175,7 @@ export async function calculatePlacementScore(userId: string): Promise<Placement
   return {
     overall,
     dsa: dsaScore,
-    projects: adjustedProjectsScore,
+    projects: projectsScore,
     resume: resumeScore,
     communication: communicationScore,
     aptitude: aptitudeScore,

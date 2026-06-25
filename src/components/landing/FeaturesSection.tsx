@@ -1,4 +1,4 @@
-import React from 'react';
+import { type ReactNode } from 'react';
 import { Zap, FileText, Lightbulb, Mic2, TrendingUp, Target } from 'lucide-react';
 
 const features = [

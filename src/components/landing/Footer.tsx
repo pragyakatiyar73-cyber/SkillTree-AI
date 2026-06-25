@@ -1,4 +1,4 @@
-import React from 'react';
+import { type ReactNode } from 'react';
 import { TreeDeciduous, Github, Linkedin, Twitter, Mail } from 'lucide-react';
 
 export default function Footer() {

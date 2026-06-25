@@ -1,4 +1,4 @@
-import React from 'react';
+import { type ReactNode } from 'react';
 import { Star } from 'lucide-react';
 
 interface Testimonial {
