@@ -15,6 +15,7 @@ export interface Profile {
   internship_readiness: number;
   total_learning_hours: number;
   skill_hours: Record<string, number>;
+  linkedin_url: string | null;
   created_at: string;
   updated_at: string;
 }

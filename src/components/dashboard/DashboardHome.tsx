@@ -6,6 +6,7 @@ import {
 import { Zap, BookOpen, Code, Award, Target, Briefcase, GraduationCap, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import PlacementScoreCard from '../placement/PlacementScoreCard';
 
 const dummyWeeklyData = [
   { day: 'Mon', hours: 3 }, { day: 'Tue', hours: 4 }, { day: 'Wed', hours: 2 },
@@ -196,7 +197,6 @@ export default function DashboardHome() {
     { label: 'Hours Invested', value: totalHours || profile?.total_learning_hours || 0, icon: <Clock size={22} />, suffix: 'hrs', gradient: 'from-purple-400 to-purple-600' },
     { label: 'Projects Done', value: projectsCompleted, icon: <Code size={22} />, gradient: 'from-orange-400 to-orange-600' },
     { label: 'Resume Score', value: resumeScore, icon: <Award size={22} />, suffix: '/100', gradient: 'from-pink-400 to-pink-600' },
-    { label: 'Placement', value: `${placementReadiness || profile?.placement_readiness || 0}%`, icon: <Briefcase size={22} />, gradient: 'from-cyan-400 to-cyan-600' },
     { label: 'Internship', value: `${internshipReadiness || profile?.internship_readiness || 0}%`, icon: <GraduationCap size={22} />, gradient: 'from-teal-400 to-teal-600' },
   ];
 
@@ -214,6 +214,7 @@ export default function DashboardHome() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <PlacementScoreCard />
         {statCards.map((card) => (
           <div key={card.label} className="stat-card">
             <div className="flex items-start justify-between mb-3">
