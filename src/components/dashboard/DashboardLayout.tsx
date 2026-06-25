@@ -15,6 +15,7 @@ const pageTitles: Record<string, string> = {
   mentor: 'Mentor AI',
   progress: 'Progress & Time Tracker',
   leetcode: 'LeetCode Tracker',
+  learning: 'AI Learning Hub',
   'mock-interview': 'Mock Interview',
   placement: 'Placement Hub',
   settings: 'Settings',

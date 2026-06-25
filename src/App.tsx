@@ -16,6 +16,7 @@ import ResumePage from './components/resume/ResumePage';
 import MentorPage from './components/mentor/MentorPage';
 import ProgressPage from './components/progress/ProgressPage';
 import LeetCodePage from './components/leetcode/LeetCodePage';
+import LearningHubPage from './components/learning/LearningHubPage';
 import MockInterviewPage from './components/mock-interview/MockInterviewPage';
 import PlacementPage from './components/placement/PlacementPage';
 import SettingsPage from './components/settings/SettingsPage';
@@ -71,6 +72,7 @@ function AppRoutes() {
       <Route path="/dashboard/mentor" element={<ProtectedRoute><DashboardLayout currentPage="mentor"><MentorPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/progress" element={<ProtectedRoute><DashboardLayout currentPage="progress"><ProgressPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/leetcode" element={<ProtectedRoute><DashboardLayout currentPage="leetcode"><LeetCodePage /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/dashboard/learning" element={<ProtectedRoute><DashboardLayout currentPage="learning"><LearningHubPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/mock-interview" element={<ProtectedRoute><DashboardLayout currentPage="mock-interview"><MockInterviewPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/placement" element={<ProtectedRoute><DashboardLayout currentPage="placement"><PlacementPage /></DashboardLayout></ProtectedRoute>} />
       <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardLayout currentPage="settings"><SettingsPage /></DashboardLayout></ProtectedRoute>} />
