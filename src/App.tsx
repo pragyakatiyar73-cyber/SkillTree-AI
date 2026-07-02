@@ -14,7 +14,7 @@ import ProjectsPage from './components/projects/ProjectsPage';
 import ProjectDetailPage from './components/projects/ProjectDetailPage';
 import ResumePage from './components/resume/ResumePage';
 import MentorPage from './components/mentor/MentorPage';
-import ProgressPage from './components/progress/ProgressPage';
+import ProgressPage from './components/placement/progress/ProgressPage';
 import LeetCodePage from './components/leetcode/LeetCodePage';
 import LearningHubPage from './components/learning/LearningHubPage';
 import MockInterviewPage from './components/mock-interview/MockInterviewPage';
