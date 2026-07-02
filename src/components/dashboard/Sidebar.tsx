@@ -25,6 +25,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   path: string;
+  adminOnly?: boolean;
 }
 
 interface SidebarProps {
@@ -32,7 +33,7 @@ interface SidebarProps {
   onNavigate: (path: string) => void;
 }
 
-const navItems: NavItem[] = [
+const allNavItems: NavItem[] = [
   { label: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
   { label: 'Roadmap', icon: <Map size={20} />, path: '/dashboard/roadmap' },
   { label: 'Projects', icon: <FolderKanban size={20} />, path: '/dashboard/projects' },
@@ -43,7 +44,7 @@ const navItems: NavItem[] = [
   { label: 'Learning Hub', icon: <BookOpen size={20} />, path: '/dashboard/learning' },
   { label: 'Mock Interview', icon: <Mic size={20} />, path: '/dashboard/mock-interview' },
   { label: 'Placement Hub', icon: <Briefcase size={20} />, path: '/dashboard/placement' },
-  { label: 'Analytics', icon: <BarChart3 size={20} />, path: '/dashboard/analytics' },
+  { label: 'Analytics', icon: <BarChart3 size={20} />, path: '/dashboard/analytics', adminOnly: true },
   { label: 'Feedback', icon: <Star size={20} />, path: '/dashboard/feedback' },
   { label: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
 ];
@@ -52,6 +53,10 @@ export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { profile, signOut } = useAuth();
+
+  const navItems = allNavItems.filter(
+    (item) => !item.adminOnly || profile?.is_admin
+  );
 
   const handleNavigate = (path: string) => {
     onNavigate(path);

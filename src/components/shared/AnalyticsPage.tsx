@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Users, Map, FolderKanban, Mic, FileText, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
+import { Users, Map, FolderKanban, Mic, FileText, MessageSquare, BarChart3, TrendingUp, ShieldAlert } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid } from 'recharts';
 
@@ -14,122 +15,89 @@ interface Stats {
   feedbackCount: number;
 }
 
+interface AnalyticsData {
+  stats: Stats;
+  featureUsage: { name: string; count: number }[];
+  dailyTrend: { date: string; users: number }[];
+  feedbackStats: { best_feature: string; count: number }[];
+  missingFeatures: { missing_feature: string; count: number }[];
+}
+
 export default function AnalyticsPage() {
-  const [stats, setStats] = useState<Stats>({
-    totalUsers: 0, activeToday: 0, roadmapsGenerated: 0, projectsCreated: 0,
-    mockInterviews: 0, resumesBuilt: 0, mentorSessions: 0, feedbackCount: 0,
-  });
-  const [featureUsage, setFeatureUsage] = useState<{ name: string; count: number }[]>([]);
-  const [dailyTrend, setDailyTrend] = useState<{ date: string; users: number }[]>([]);
-  const [feedbackStats, setFeedbackStats] = useState<{ best_feature: string; count: number }[]>([]);
-  const [missingFeatures, setMissingFeatures] = useState<{ missing_feature: string; count: number }[]>([]);
+  const { profile } = useAuth();
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!profile) return;
+
+    if (!profile.is_admin) {
+      setLoading(false);
+      return;
+    }
+
     loadAnalytics();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const safeCount = async (table: string): Promise<number> => {
-    try {
-      const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
-      if (error) {
-        console.warn(`[Analytics] Failed to count ${table}:`, error.message);
-        return 0;
-      }
-      return count || 0;
-    } catch {
-      return 0;
-    }
-  };
-
-  const safeSelect = async (table: string, select: string, options?: { notNull?: string }) => {
-    try {
-      let q = supabase.from(table).select(select);
-      if (options?.notNull) q = q.not(options.notNull, 'is', null);
-      const { data, error } = await q;
-      if (error) {
-        console.warn(`[Analytics] Failed to select ${table}:`, error.message);
-        return null;
-      }
-      return data;
-    } catch {
-      return null;
-    }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id, profile?.is_admin]);
 
   const loadAnalytics = async () => {
     setLoading(true);
+    setError(null);
 
-    const totalUsers = await safeCount('profiles');
-    const roadmapsGenerated = await safeCount('roadmaps');
-    const aiProjectsCreated = await safeCount('ai_projects');
-    const mockInterviews = await safeCount('mock_interviews');
-    const resumesBuilt = await safeCount('resumes');
-    const mentorSessions = await safeCount('mentor_sessions');
-    const feedbackCount = await safeCount('feedback');
-
-    const today = new Date().toISOString().split('T')[0];
-    let activeToday = 0;
     try {
-      const { count } = await supabase.from('analytics_events').select('*', { count: 'exact', head: true }).gte('created_at', today);
-      activeToday = count || 0;
-    } catch { activeToday = 0; }
-
-    setStats({
-      totalUsers, activeToday, roadmapsGenerated, projectsCreated: aiProjectsCreated,
-      mockInterviews, resumesBuilt, mentorSessions, feedbackCount,
-    });
-
-    setFeatureUsage([
-      { name: 'Roadmaps', count: roadmapsGenerated },
-      { name: 'Projects', count: aiProjectsCreated },
-      { name: 'Interviews', count: mockInterviews },
-      { name: 'Resumes', count: resumesBuilt },
-      { name: 'Mentor', count: mentorSessions },
-      { name: 'Feedback', count: feedbackCount },
-    ]);
-
-    const dailyData = await safeSelect('analytics_daily', '*');
-    if (dailyData && dailyData.length > 0) {
-      setDailyTrend(dailyData.reverse().map((d: { date: string; active_users: number }) => ({ date: d.date, users: d.active_users })));
-    } else {
-      const trend = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        trend.push({ date: d.toLocaleDateString('en', { weekday: 'short' }), users: Math.floor(Math.random() * 50) + 10 });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Not authenticated');
+        setLoading(false);
+        return;
       }
-      setDailyTrend(trend);
-    }
 
-    const feedbackBest = await safeSelect('feedback', 'best_feature', { notNull: 'best_feature' });
-    if (feedbackBest) {
-      const bestCounts: Record<string, number> = {};
-      feedbackBest.forEach((f: { best_feature: string }) => { bestCounts[f.best_feature] = (bestCounts[f.best_feature] || 0) + 1; });
-      setFeedbackStats(Object.entries(bestCounts).map(([name, count]) => ({ best_feature: name, count })).sort((a, b) => b.count - a.count));
-    }
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-analytics`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-    const feedbackMissing = await safeSelect('feedback', 'missing_feature', { notNull: 'missing_feature' });
-    if (feedbackMissing) {
-      const missingCounts: Record<string, number> = {};
-      feedbackMissing.forEach((f: { missing_feature: string }) => { missingCounts[f.missing_feature] = (missingCounts[f.missing_feature] || 0) + 1; });
-      setMissingFeatures(Object.entries(missingCounts).map(([name, count]) => ({ missing_feature: name, count })).sort((a, b) => b.count - a.count));
-    }
+      if (!response.ok) {
+        const result = await response.json();
+        if (response.status === 403) {
+          setError('Access denied. Admin privileges required.');
+        } else {
+          setError(result.error || 'Failed to load analytics');
+        }
+        setLoading(false);
+        return;
+      }
 
-    setLoading(false);
+      const analyticsData: AnalyticsData = await response.json();
+      setData(analyticsData);
+    } catch (err) {
+      console.error('Failed to load analytics:', err);
+      setError('Failed to connect to analytics service');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const statCards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-blue-400' },
-    { label: 'Active Today', value: stats.activeToday, icon: TrendingUp, color: 'text-green-400' },
-    { label: 'Roadmaps Generated', value: stats.roadmapsGenerated, icon: Map, color: 'text-emerald-400' },
-    { label: 'Projects Created', value: stats.projectsCreated, icon: FolderKanban, color: 'text-purple-400' },
-    { label: 'Mock Interviews', value: stats.mockInterviews, icon: Mic, color: 'text-orange-400' },
-    { label: 'Resumes Built', value: stats.resumesBuilt, icon: FileText, color: 'text-cyan-400' },
-    { label: 'Mentor Sessions', value: stats.mentorSessions, icon: MessageSquare, color: 'text-yellow-400' },
-    { label: 'Feedback', value: stats.feedbackCount, icon: BarChart3, color: 'text-pink-400' },
-  ];
+  if (!profile?.is_admin) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="glass-card p-12 text-center max-w-md">
+          <ShieldAlert size={48} className="text-red-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Access Denied</h2>
+          <p className="text-gray-400">
+            Analytics is restricted to administrators only. If you believe you should have access, please contact support.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -140,6 +108,42 @@ export default function AnalyticsPage() {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="glass-card p-8 text-center">
+            <ShieldAlert size={40} className="text-red-400 mx-auto mb-4" />
+            <p className="text-red-400 font-medium">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const statCards = [
+    { label: 'Total Users', value: data.stats.totalUsers, icon: Users, color: 'text-blue-400' },
+    { label: 'Active Today', value: data.stats.activeToday, icon: TrendingUp, color: 'text-green-400' },
+    { label: 'Roadmaps Generated', value: data.stats.roadmapsGenerated, icon: Map, color: 'text-emerald-400' },
+    { label: 'Projects Created', value: data.stats.projectsCreated, icon: FolderKanban, color: 'text-purple-400' },
+    { label: 'Mock Interviews', value: data.stats.mockInterviews, icon: Mic, color: 'text-orange-400' },
+    { label: 'Resumes Built', value: data.stats.resumesBuilt, icon: FileText, color: 'text-cyan-400' },
+    { label: 'Mentor Sessions', value: data.stats.mentorSessions, icon: MessageSquare, color: 'text-yellow-400' },
+    { label: 'Feedback', value: data.stats.feedbackCount, icon: BarChart3, color: 'text-pink-400' },
+  ];
+
+  const displayTrend = data.dailyTrend.length > 0
+    ? data.dailyTrend
+    : Array.from({ length: 7 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return { date: d.toLocaleDateString('en', { weekday: 'short' }), users: 0 };
+      });
 
   return (
     <div className="space-y-6">
@@ -168,7 +172,7 @@ export default function AnalyticsPage() {
           <h3 className="text-lg font-semibold text-white mb-4">Feature Usage</h3>
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={featureUsage}>
+              <BarChart data={data.featureUsage}>
                 <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 12 }} />
                 <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} />
                 <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff' }} />
@@ -181,7 +185,7 @@ export default function AnalyticsPage() {
           <h3 className="text-lg font-semibold text-white mb-4">Daily Active Users</h3>
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyTrend}>
+              <LineChart data={displayTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 12 }} />
                 <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} />
@@ -195,9 +199,9 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="stat-card">
           <h3 className="text-lg font-semibold text-white mb-4">Most Loved Features</h3>
-          {feedbackStats.length > 0 ? (
+          {data.feedbackStats.length > 0 ? (
             <div className="space-y-3">
-              {feedbackStats.map((f, i) => (
+              {data.feedbackStats.map((f, i) => (
                 <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                   <span className="text-gray-300 text-sm">{f.best_feature}</span>
                   <span className="text-primary-400 font-semibold">{f.count}</span>
@@ -210,9 +214,9 @@ export default function AnalyticsPage() {
         </div>
         <div className="stat-card">
           <h3 className="text-lg font-semibold text-white mb-4">Most Requested Features</h3>
-          {missingFeatures.length > 0 ? (
+          {data.missingFeatures.length > 0 ? (
             <div className="space-y-3">
-              {missingFeatures.map((f, i) => (
+              {data.missingFeatures.map((f, i) => (
                 <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                   <span className="text-gray-300 text-sm">{f.missing_feature}</span>
                   <span className="text-yellow-400 font-semibold">{f.count}</span>
