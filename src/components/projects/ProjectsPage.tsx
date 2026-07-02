@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, Loader, Trash2, FolderOpen, Clock, ChevronRight,
-  Lightbulb, Layers, Database, GitBranch, Rocket, Wand2
+  Lightbulb, Layers, Database, Wand2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';

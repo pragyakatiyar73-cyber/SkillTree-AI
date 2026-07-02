@@ -16,6 +16,12 @@ export interface Profile {
   total_learning_hours: number;
   skill_hours: Record<string, number>;
   linkedin_url: string | null;
+  linkedin_score: number | null;
+  current_connections: number;
+  connections_goal: number;
+  current_streak: number;
+  longest_streak: number;
+  last_active_date: string | null;
   created_at: string;
   updated_at: string;
 }

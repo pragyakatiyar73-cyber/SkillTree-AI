@@ -3,8 +3,8 @@ import {
   Send, Bot, MessageSquare, Plus, Trash2, Sparkles,
   Youtube, ExternalLink, ChevronRight, BookOpen, Brain,
   Target, Zap, X, Menu, CheckCircle2, Calendar, Lightbulb,
-  FolderKanban, TrendingUp, AlertTriangle, Clock, Award,
-  BarChart3, ChevronDown, Flame, ArrowRight
+  FolderKanban, TrendingUp, AlertTriangle, Award,
+  BarChart3
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -271,7 +271,7 @@ export default function MentorPage() {
   // Dashboard state
   const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
-  const [studyPlans, setStudyPlans] = useState<StudyPlan[]>([]);
+  const [,] = useState<StudyPlan[]>([]);
   const [weakAreas, setWeakAreas] = useState<string[]>([]);
   const [skillProgress, setSkillProgress] = useState<Record<string, number>>({});
   const [projectIdeas, setProjectIdeas] = useState<string[]>([]);
@@ -341,6 +341,7 @@ export default function MentorPage() {
     if (currentSession?.id) {
       loadMessages(currentSession.id);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSession?.id]);
 
   // ── Load Dashboard Data ──────────────────────────────────────────────────

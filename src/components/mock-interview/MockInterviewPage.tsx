@@ -166,6 +166,7 @@ export default function MockInterviewPage() {
     } finally {
       setEvaluating(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, user, getQuestionsForCategory]);
 
   const completeInterview = async (evaluations: (QuestionEvaluation | null)[]) => {
@@ -188,7 +189,7 @@ export default function MockInterviewPage() {
     const endTime = new Date();
     const durationSeconds = Math.round((endTime.getTime() - session.startTime.getTime()) / 1000);
     const categoryQuestions = getQuestionsForCategory(session.category);
-    const questionsData = categoryQuestions.map((q, idx) => ({ id: q.id, question: q.question, category: q.category, difficulty: q.difficulty }));
+    const questionsData = categoryQuestions.map((q) => ({ id: q.id, question: q.question, category: q.category, difficulty: q.difficulty }));
     const interviewData = {
       user_id: user.id,
       questions: questionsData,

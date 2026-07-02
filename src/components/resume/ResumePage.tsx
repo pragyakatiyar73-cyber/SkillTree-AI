@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import {
-  Plus, Trash2, Download, Sparkles, Loader, ChevronDown, ChevronUp,
+  Plus, Trash2, Download, Sparkles, Loader,
   Sun, Moon, Image, FileText, Layout, Eye, Type, Award, Briefcase,
   GraduationCap, Wrench, Folder, Save, X, Check, Palette
 } from 'lucide-react';
@@ -57,7 +56,6 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 // ── Component ───────────────────────────────────────────────────────────────
 export default function ResumePage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const previewRef = useRef<HTMLDivElement>(null);
 
   const [profile, setProfile] = useState<ProfileData>({
@@ -82,13 +80,14 @@ export default function ResumePage() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [activeSection, setActiveSection] = useState('personal');
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const [skillInput, setSkillInput] = useState('');
   const [skillLevel, setSkillLevel] = useState(3);
   const [toast, setToast] = useState('');
 
   // Load data
-  useEffect(() => { if (user?.id) loadData(); }, [user?.id]);
+  useEffect(() => { if (user?.id) loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const loadData = async () => {
     if (!user) return;
@@ -119,8 +118,9 @@ export default function ResumePage() {
           certifications: res.certifications || [],
         });
       }
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    } catch {
+      // Continue with defaults
+    } finally { setLoading(false); }
   };
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
@@ -187,7 +187,7 @@ export default function ResumePage() {
       const { data: urlData } = supabase.storage.from('resume-photos').getPublicUrl(path);
       setProfile(prev => ({ ...prev, profile_photo_url: urlData.publicUrl }));
       showToast('Photo uploaded');
-    } catch (e) {
+    } catch {
       showToast('Photo upload failed');
     } finally { setUploadingPhoto(false); }
   };
@@ -212,11 +212,8 @@ export default function ResumePage() {
   };
 
   // ── Section helpers ───────────────────────────────────────────────────────
-  const toggleSection = (key: string) => {
-    setCollapsedSections(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
-  };
 
-  const updateProfile = (field: keyof ProfileData, value: string) => setProfile(p => ({ ...p, [field]: value }));
+  const updateProfileField = (field: keyof ProfileData, value: string) => setProfile(p => ({ ...p, [field]: value }));
   const updateResume = (field: keyof ResumeData, value: unknown) => setResume(r => ({ ...r, [field]: value }));
 
   const addEdu = () => updateResume('education', [...resume.education, { id: crypto.randomUUID(), institution: '', degree: '', field: '', startDate: '', endDate: '', gpa: '' }]);
@@ -396,14 +393,14 @@ export default function ResumePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Full Name" value={profile.full_name} onChange={v => updateProfile('full_name', v)} placeholder="John Doe" />
-                <Field label="Email" value={profile.email} onChange={v => updateProfile('email', v)} placeholder="john@example.com" type="email" />
-                <Field label="Phone" value={profile.phone} onChange={v => updateProfile('phone', v)} placeholder="+1 555 000 0000" />
-                <Field label="Location" value={profile.location} onChange={v => updateProfile('location', v)} placeholder="San Francisco, CA" />
-                <Field label="LinkedIn" value={profile.linkedin} onChange={v => updateProfile('linkedin', v)} placeholder="linkedin.com/in/john" />
-                <Field label="GitHub" value={profile.github} onChange={v => updateProfile('github', v)} placeholder="github.com/john" />
-                <Field label="Portfolio" value={profile.portfolio} onChange={v => updateProfile('portfolio', v)} placeholder="johndoe.com" />
-                <Field label="Website" value={profile.website} onChange={v => updateProfile('website', v)} placeholder="blog.johndoe.com" />
+                <Field label="Full Name" value={profile.full_name} onChange={v => updateProfileField('full_name', v)} placeholder="John Doe" />
+                <Field label="Email" value={profile.email} onChange={v => updateProfileField('email', v)} placeholder="john@example.com" type="email" />
+                <Field label="Phone" value={profile.phone} onChange={v => updateProfileField('phone', v)} placeholder="+1 555 000 0000" />
+                <Field label="Location" value={profile.location} onChange={v => updateProfileField('location', v)} placeholder="San Francisco, CA" />
+                <Field label="LinkedIn" value={profile.linkedin} onChange={v => updateProfileField('linkedin', v)} placeholder="linkedin.com/in/john" />
+                <Field label="GitHub" value={profile.github} onChange={v => updateProfileField('github', v)} placeholder="github.com/john" />
+                <Field label="Portfolio" value={profile.portfolio} onChange={v => updateProfileField('portfolio', v)} placeholder="johndoe.com" />
+                <Field label="Website" value={profile.website} onChange={v => updateProfileField('website', v)} placeholder="blog.johndoe.com" />
               </div>
             </div>
           )}
@@ -424,7 +421,7 @@ export default function ResumePage() {
               <TextArea
                 label="Summary"
                 value={profile.professional_summary}
-                onChange={v => updateProfile('professional_summary', v)}
+                onChange={v => updateProfileField('professional_summary', v)}
                 placeholder="A results-driven software engineer with 3+ years of experience..."
                 rows={5}
               />

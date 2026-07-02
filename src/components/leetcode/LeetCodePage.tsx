@@ -5,8 +5,8 @@ import type { LeetCodeStats } from '../../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import {
   Plus, Minus, TrendingUp, Flame, RefreshCw, ExternalLink, Trophy, Activity,
-  Target, Calendar, Star, ChevronRight, Lock, BookOpen, Zap, Brain, ArrowRight,
-  Award, Clock, AlertTriangle, CheckCircle2
+  Target, Calendar, ChevronRight, Lock, BookOpen, Zap, Brain, ArrowRight,
+  Award, AlertTriangle, CheckCircle2
 } from 'lucide-react';
 
 const DSA_TOPICS = [
@@ -243,7 +243,8 @@ export default function LeetCodePage() {
     } finally {
       setFetching(false);
     }
-  }, [username, user, stats, updateProfile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [username, user, stats?.id, updateProfile]);
 
   const updateProfileStreak = async () => {
     if (!user || !profile) return;

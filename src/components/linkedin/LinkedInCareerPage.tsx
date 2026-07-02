@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import {
   Linkedin, Sparkles, Copy, Check, RefreshCw, ChevronRight,
-  TrendingUp, Target, Users, Calendar, CheckCircle2, Circle,
+  TrendingUp, Target, Users, Calendar, CheckCircle2,
   AlertTriangle, Star, Award, Zap, Lightbulb, ArrowRight,
   ExternalLink, BarChart3, Shield, Flame, Globe
 } from 'lucide-react';

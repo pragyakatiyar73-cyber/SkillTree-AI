@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
-import { Zap, BookOpen, Code, Award, Target, Briefcase, GraduationCap, Clock } from 'lucide-react';
+import { Zap, Code, Award, Target, GraduationCap, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import PlacementScoreCard from '../placement/PlacementScoreCard';
@@ -25,7 +25,7 @@ export default function DashboardHome() {
   const [skillHours, setSkillHours] = useState<Record<string, number>>({});
   const [projectsCompleted, setProjectsCompleted] = useState(0);
   const [resumeScore, setResumeScore] = useState(0);
-  const [placementReadiness, setPlacementReadiness] = useState(0);
+  const [, setPlacementReadiness] = useState(0);
   const [internshipReadiness, setInternshipReadiness] = useState(0);
   const [weeklyData, setWeeklyData] = useState(dummyWeeklyData);
   const [loading, setLoading] = useState(true);

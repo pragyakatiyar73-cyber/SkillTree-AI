@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { calculatePlacementScore, type PlacementScore } from '../../lib/placementScore';
 import {
   Shield, Trophy, AlertTriangle, Lightbulb, Code2, FolderKanban,
-  FileText, MessageSquare, Brain, Linkedin, ChevronRight, Loader2,
+  FileText, MessageSquare, Brain, Linkedin, ChevronRight,
   ArrowUp, ArrowDown, Minus, Target, Sparkles, BarChart3, Award,
   Zap, CheckCircle2, XCircle, Clock, TrendingUp, Rocket
 } from 'lucide-react';

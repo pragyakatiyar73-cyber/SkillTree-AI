@@ -1,4 +1,3 @@
-import { type ReactNode } from 'react';
 import { Star } from 'lucide-react';
 
 interface Testimonial {

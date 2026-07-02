@@ -54,7 +54,7 @@ export default function ProjectDetailPage() {
       } else {
         setProject(data as AIProject);
       }
-    } catch (e) {
+    } catch {
       setError('Project not found or you do not have access.');
     } finally {
       setLoading(false);

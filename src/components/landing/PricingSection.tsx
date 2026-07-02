@@ -1,4 +1,3 @@
-import { type ReactNode } from 'react';
 import { Check, ArrowRight } from 'lucide-react';
 
 interface PricingTier {

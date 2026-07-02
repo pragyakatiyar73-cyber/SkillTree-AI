@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Lock, Trash2, Mail, User, GraduationCap, AlertTriangle } from 'lucide-react';
+import { Moon, Sun, Lock, Trash2, Mail, User, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';

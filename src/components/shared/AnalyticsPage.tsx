@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, UserPlus, Map, FolderKanban, Mic, FileText, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
+import { Users, Map, FolderKanban, Mic, FileText, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid } from 'recharts';
 
@@ -27,6 +27,7 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     loadAnalytics();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const safeCount = async (table: string): Promise<number> => {

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import {
-  BookOpen, CheckCircle, Circle, Play, ExternalLink, Clock, ChevronRight,
+  BookOpen, Play, ExternalLink, Clock, ChevronRight,
   Filter, Target, Flame, Brain, Trophy, ArrowRight, Lock, Star, Layers
 } from 'lucide-react';
 
