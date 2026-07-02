@@ -4,7 +4,7 @@ import {
   Youtube, ExternalLink, ChevronRight, BookOpen, Brain,
   Target, Zap, X, Menu, CheckCircle2, Calendar, Lightbulb,
   FolderKanban, TrendingUp, AlertTriangle, Award,
-  BarChart3
+  BarChart3, GraduationCap, Play
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -54,6 +54,191 @@ interface StudyPlan {
   duration_weeks: number;
   hours_per_week: number;
   created_at: string;
+}
+
+interface Teacher {
+  name: string;
+  specialization: string;
+  channelUrl: string;
+  description: string;
+  avatar?: string;
+}
+
+// ─── Static Teacher Recommendations ────────────────────────────────────────────
+
+const TEACHER_RECOMMENDATIONS: Record<string, Teacher[]> = {
+  'DSA': [
+    {
+      name: 'Striver',
+      specialization: 'DSA & Competitive Programming',
+      channelUrl: 'https://www.youtube.com/@takeUforward',
+      description: 'Expert in DSA patterns, competitive programming, and interview preparation. Known for structured A2Z DSA course.',
+    },
+    {
+      name: 'Love Babbar',
+      specialization: 'DSA, C++ & Placement Preparation',
+      channelUrl: 'https://www.youtube.com/@CodeHelp',
+      description: 'Comprehensive DSA tutorials in C++. Famous for his 45 days placement series and clear explanations.',
+    },
+  ],
+  'Full Stack Developer': [
+    {
+      name: 'Shradha Khapra',
+      specialization: 'Web Development & Programming',
+      channelUrl: 'https://www.youtube.com/@ApnaCollegeOfficial',
+      description: 'Co-founder of Apna College. Excellent web development courses from basics to advanced.',
+    },
+    {
+      name: 'Hitesh Choudhary',
+      specialization: 'Full Stack Development & JavaScript',
+      channelUrl: 'https://www.youtube.com/@Hitesh Choudhary',
+      description: 'Deep dives into JavaScript, React, Node.js, and backend technologies. Practical project-based learning.',
+    },
+  ],
+  'Frontend Developer': [
+    {
+      name: 'Shradha Khapra',
+      specialization: 'Web Development & Programming',
+      channelUrl: 'https://www.youtube.com/@ApnaCollegeOfficial',
+      description: 'Co-founder of Apna College. Excellent web development courses from basics to advanced.',
+    },
+    {
+      name: 'Hitesh Choudhary',
+      specialization: 'Full Stack Development & JavaScript',
+      channelUrl: 'https://www.youtube.com/@Hitesh Choudhary',
+      description: 'Deep dives into JavaScript, React, Node.js, and backend technologies. Practical project-based learning.',
+    },
+  ],
+  'Backend Developer': [
+    {
+      name: 'Hitesh Choudhary',
+      specialization: 'Full Stack Development & JavaScript',
+      channelUrl: 'https://www.youtube.com/@Hitesh Choudhary',
+      description: 'Deep dives into JavaScript, React, Node.js, and backend technologies. Practical project-based learning.',
+    },
+    {
+      name: 'Love Babbar',
+      specialization: 'DSA, C++ & Placement Preparation',
+      channelUrl: 'https://www.youtube.com/@CodeHelp',
+      description: 'Comprehensive DSA tutorials in C++. Famous for his 45 days placement series and clear explanations.',
+    },
+  ],
+  'AI Engineer': [
+    {
+      name: 'Krish Naik',
+      specialization: 'Machine Learning & Data Science',
+      channelUrl: 'https://www.youtube.com/@krishnaik06',
+      description: 'Renowned ML educator. Covers machine learning, deep learning, NLP, and data science comprehensively.',
+    },
+    {
+      name: 'CampusX',
+      specialization: 'Data Science & Machine Learning',
+      channelUrl: 'https://www.youtube.com/@CampusX-official',
+      description: 'In-depth data science courses with hands-on projects. Strong focus on real-world applications.',
+    },
+  ],
+  'Data Analyst': [
+    {
+      name: 'Krish Naik',
+      specialization: 'Machine Learning & Data Science',
+      channelUrl: 'https://www.youtube.com/@krishnaik06',
+      description: 'Renowned ML educator. Covers machine learning, deep learning, NLP, and data science comprehensively.',
+    },
+    {
+      name: 'CampusX',
+      specialization: 'Data Science & Machine Learning',
+      channelUrl: 'https://www.youtube.com/@CampusX-official',
+      description: 'In-depth data science courses with hands-on projects. Strong focus on real-world applications.',
+    },
+  ],
+  'Cyber Security': [
+    {
+      name: 'NetworkChuck',
+      specialization: 'Networking & Cybersecurity',
+      channelUrl: 'https://www.youtube.com/@NetworkChuck',
+      description: 'Passionate about networking and cybersecurity. Makes complex topics accessible and fun to learn.',
+    },
+    {
+      name: 'David Bombal',
+      specialization: 'Cybersecurity & Networking',
+      channelUrl: 'https://www.youtube.com/@davidbombal',
+      description: 'Expert in Cisco certifications, ethical hacking, and cybersecurity. Interview-focused content.',
+    },
+  ],
+  'DevOps': [
+    {
+      name: 'NetworkChuck',
+      specialization: 'Networking & Cybersecurity',
+      channelUrl: 'https://www.youtube.com/@NetworkChuck',
+      description: 'Passionate about networking and cybersecurity. Makes complex topics accessible and fun to learn.',
+    },
+    {
+      name: 'Hitesh Choudhary',
+      specialization: 'Full Stack Development & JavaScript',
+      channelUrl: 'https://www.youtube.com/@Hitesh Choudhary',
+      description: 'Deep dives into JavaScript, React, Node.js, and backend technologies. Practical project-based learning.',
+    },
+  ],
+  'Mobile Developer': [
+    {
+      name: 'Hitesh Choudhary',
+      specialization: 'Full Stack Development & JavaScript',
+      channelUrl: 'https://www.youtube.com/@Hitesh Choudhary',
+      description: 'Deep dives into JavaScript, React, Node.js, and backend technologies. Practical project-based learning.',
+    },
+  ],
+};
+
+const DEFAULT_TEACHERS: Teacher[] = [
+  {
+    name: 'Striver',
+    specialization: 'DSA & Competitive Programming',
+    channelUrl: 'https://www.youtube.com/@takeUforward',
+    description: 'Expert in DSA patterns, competitive programming, and interview preparation.',
+  },
+  {
+    name: 'Krish Naik',
+    specialization: 'Machine Learning & Data Science',
+    channelUrl: 'https://www.youtube.com/@krishnaik06',
+    description: 'Renowned ML educator covering machine learning, deep learning, and data science.',
+  },
+];
+
+function getRecommendedTeachers(careerGoal: string | undefined): Teacher[] {
+  if (!careerGoal) return DEFAULT_TEACHERS;
+  return TEACHER_RECOMMENDATIONS[careerGoal] || DEFAULT_TEACHERS;
+}
+
+// ─── Teacher Card Component ────────────────────────────────────────────────────
+
+function TeacherCard({ teacher }: { teacher: Teacher }) {
+  return (
+    <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-primary-500/30 transition-all group">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500/20 to-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <GraduationCap size={24} className="text-primary-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h3 className="text-base font-bold text-white group-hover:text-primary-400 transition-colors">{teacher.name}</h3>
+              <p className="text-xs text-primary-400 mt-0.5">{teacher.specialization}</p>
+            </div>
+            <a
+              href={teacher.channelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded-lg text-red-400 text-xs font-medium transition-all"
+            >
+              <Play size={12} />
+              Watch
+            </a>
+          </div>
+          <p className="text-sm text-gray-400 mt-2 leading-relaxed">{teacher.description}</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -790,6 +975,28 @@ export default function MentorPage() {
                 Ask me to create study plans, explain concepts, generate quizzes, or recommend resources.
               </p>
             </div>
+
+            {/* Quick Teacher Links */}
+            <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <GraduationCap size={14} className="text-amber-400" />
+                <span className="text-xs font-semibold text-white">Top Teachers for {profile?.goal || 'You'}</span>
+              </div>
+              <div className="space-y-1.5">
+                {getRecommendedTeachers(profile?.goal).slice(0, 3).map((teacher) => (
+                  <a
+                    key={teacher.name}
+                    href={teacher.channelUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-xs text-gray-400 hover:text-amber-400 transition-colors"
+                  >
+                    <ExternalLink size={10} />
+                    {teacher.name}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </aside>
@@ -976,6 +1183,20 @@ export default function MentorPage() {
                     >
                       Get more project ideas from AI
                     </button>
+                  </div>
+                </div>
+
+                {/* Recommended Teachers */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="text-amber-400" size={20} />
+                    <h2 className="text-lg font-bold text-white">Recommended Teachers</h2>
+                    <span className="text-xs text-gray-500">For your career: {profile?.goal || 'General'}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getRecommendedTeachers(profile?.goal).map((teacher) => (
+                      <TeacherCard key={teacher.name} teacher={teacher} />
+                    ))}
                   </div>
                 </div>
               </div>
